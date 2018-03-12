@@ -10,7 +10,10 @@ RUN pacman -S --quiet --noconfirm --needed \
             imagemagick graphicsmagick fftw sox zeromq \
             ipython qt4 qt5-webkit \
             fakeroot awk \
-            gcc-fortran
+            gcc-fortran \
+            hdf5 \
+            python2 python2-pip \
+            jre8-openjdk-headless
 
 RUN mkdir /home/build &&\
     chgrp nobody /home/build &&\
@@ -41,5 +44,18 @@ ENV DYLD_LIBRARY_PATH=/root/torch/install/lib:$DYLD_LIBRARY_PATH
 ENV LUA_CPATH='/root/torch/install/lib/?.so;'$LUA_CPATH
 
 WORKDIR /root
+
+RUN luarocks install lua-cjson
+RUN git clone https://github.com/deepmind/torch-totem && \
+    cd torch-totem && \
+    luarocks make rocks/totem-0-0.rockspec
+
+RUN git clone https://github.com/deepmind/torch-hdf5 && \
+    cd torch-hdf5 && \
+    luarocks make hdf5-0-0.rockspec
+
+RUN git clone https://github.com/jcjohnson/torch-rnn.git && \
+    cd torch-rnn && \
+    pip2 install -r requirements.txt
 
 ENTRYPOINT th
