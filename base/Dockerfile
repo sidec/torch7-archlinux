@@ -2,7 +2,7 @@ FROM archlinux/base
 
 MAINTAINER Przemyslaw Sanecki
 
-RUN pacman -Sy --noconfirm
+RUN pacman -Suy --noconfirm
 RUN pacman -S --quiet --noconfirm --needed \
             sudo gettext gcc make wget which \
             cmake curl readline ncurses git \
@@ -20,17 +20,20 @@ RUN mkdir /home/build &&\
 
 USER nobody
 WORKDIR  /home/build
-RUN git clone https://aur.archlinux.org/openblas-lapack.git
+# RUN git clone https://aur.archlinux.org/openblas-lapack.git
+# RUN mkdir /home/build/openblas-lapack
+RUN curl https://aur.archlinux.org/cgit/aur.git/snapshot/openblas-lapack.tar.gz | tar zxf - 
 WORKDIR /home/build/openblas-lapack
 USER root
-RUN sudo -u nobody makepkg -cs --noconfirm
-RUN pacman -U --noconfirm openblas-lapack*
+RUN sudo -u nobody makepkg -csi --noconfirm
+# RUN pacman -U --noconfirm openblas-lapack*
 
 WORKDIR /root
 
 RUN git clone https://github.com/torch/distro.git ~/torch --recursive
 
 WORKDIR /root/torch
+# RUN ["bash", "install-deps"]
 RUN ./install.sh
 
 ENV LUA_PATH='/root/.luarocks/share/lua/5.1/?.lua;/root/.luarocks/share/lua/5.1/?/init.lua;/root/torch/install/share/lua/5.1/?.lua;/root/torch/install/share/lua/5.1/?/init.lua;./?.lua;/root/torch/install/share/luajit-2.1.0-beta1/?.lua;/usr/local/share/lua/5.1/?.lua;/usr/local/share/lua/5.1/?/init.lua'
